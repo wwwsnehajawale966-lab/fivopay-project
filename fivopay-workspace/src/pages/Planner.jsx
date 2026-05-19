@@ -39,7 +39,7 @@ import { plannerService } from '../services/api';
 const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-8 py-4 transition-all duration-500 group relative ${
+    className={`w-full flex items-center gap-3 px-6 py-3 transition-all duration-500 group relative ${
       active 
         ? '' 
         : ''
@@ -179,7 +179,7 @@ const FocusTimerCard = ({ activeTask, onSessionComplete }) => {
   const circumference = 2 * Math.PI * 88; // ~553
 
   return (
-    <div className="p-6 rounded-[24px] border text-center relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', borderColor: '#D1FAE5', boxShadow: '0 2px 16px rgba(6,182,212,0.08)' }}>
+    <div className="p-6 rounded-[24px] border text-center relative overflow-hidden shrink-0" style={{ backgroundColor: '#FFFFFF', borderColor: '#D1FAE5', boxShadow: '0 2px 16px rgba(6,182,212,0.08)' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h4 className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: '#06B6D4' }}>Deep Work</h4>
@@ -268,7 +268,7 @@ const FocusTimerCard = ({ activeTask, onSessionComplete }) => {
 
 
 const ProductivitySummaryCard = ({ stats }) => (
-  <div className="rounded-[32px] p-6 text-white shadow-premium relative overflow-hidden group" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+  <div className="rounded-[32px] p-6 text-white shadow-premium relative overflow-hidden group shrink-0" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
     <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
     
     <div className="flex items-center gap-2 mb-6 relative z-10">
@@ -506,19 +506,19 @@ const Planner = () => {
   return (
     <div className="flex h-screen font-sans overflow-hidden" style={{ backgroundColor: '#ECFEFF' }}>
       {/* Sidebar */}
-      <aside className="w-80 h-full flex flex-col shrink-0 z-20 shadow-sm" style={{ backgroundColor: '#FFFFFF', borderRight: '1px solid #D1FAE5' }}>
-        <div className="p-12 flex items-center gap-5">
-          <div className="w-14 h-14 rounded-[20px] flex items-center justify-center shadow-lg shadow-indigo-300/50 text-white" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
-            <TargetIcon className="w-8 h-8" />
+      <aside className="w-64 h-full flex flex-col shrink-0 z-20 shadow-sm" style={{ backgroundColor: '#FFFFFF', borderRight: '1px solid #D1FAE5' }}>
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shadow-lg shadow-indigo-300/50 text-white" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+            <TargetIcon className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-black text-2xl leading-tight tracking-tighter" style={{ color: '#0F172A' }}>FivoPay</h2>
+            <h2 className="font-black text-lg leading-tight tracking-tighter" style={{ color: '#0F172A' }}>FivoPay</h2>
             <p className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: '#94A3B8' }}>Personal</p>
           </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto custom-scrollbar">
-          <div className="px-12 mb-8">
+          <div className="px-6 mb-4">
             <p className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: '#94A3B8' }}>Workspace</p>
           </div>
           <SidebarItem icon={Layout} label="Dashboard" onClick={() => navigate('/dashboard')} />
@@ -527,9 +527,9 @@ const Planner = () => {
           <SidebarItem icon={Settings} label="Settings" onClick={() => navigate('/settings')} />
         </nav>
 
-        <div className="p-10 mt-auto">
-          <div className="rounded-[40px] p-8 flex items-center gap-5 border shadow-sm backdrop-blur-sm transition-all duration-500" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
-            <div className="w-14 h-14 rounded-[18px] flex items-center justify-center text-white font-black shadow-lg text-xl" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+        <div className="p-6 mt-auto">
+          <div className="rounded-[24px] p-4 flex items-center gap-4 border shadow-sm backdrop-blur-sm transition-all duration-500" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-white font-black shadow-lg text-md" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
               {user?.name?.[0] || 'U'}
             </div>
             <div className="flex-1 min-w-0">
@@ -541,44 +541,44 @@ const Planner = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-16">
-        <header className="mb-16 flex items-center justify-between">
+      <main className="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <header className="mb-8 flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-4 mb-4">
-              <h1 className="text-5xl font-black tracking-tighter" style={{ color: '#0F172A' }}>Planner</h1>
-              <div className="px-4 py-2 text-white rounded-2xl text-sm font-black shadow-lg" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-black tracking-tighter" style={{ color: '#0F172A' }}>Planner</h1>
+              <div className="px-3 py-1 text-white rounded-xl text-xs font-black shadow-md" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
                 Today
               </div>
             </div>
-            <p className="font-bold" style={{ color: '#94A3B8' }}>Plan your day, achieve your goals</p>
+            <p className="font-bold text-xs" style={{ color: '#94A3B8' }}>Plan your day, achieve your goals</p>
           </div>
           <button 
             onClick={() => setIsAddingTask('Morning')} 
-            className="text-white px-10 py-6 rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-lg hover:shadow-xl hover:scale-105 transition-all transform hover:-translate-y-1 flex items-center gap-4" 
+            className="text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:scale-105 transition-all transform hover:-translate-y-1 flex items-center gap-2" 
             style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-4 h-4" />
             New Goal
           </button>
         </header>
 
-        <div className="space-y-16">
+        <div className="space-y-8">
           {/* Time Block Planning */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {[
               { id: 'Morning', icon: Sun, color: '#F59E0B', bg: '#F8FAFC' },
               { id: 'Afternoon', icon: Cloud, color: '#06B6D4', bg: '#F8FAFC' },
               { id: 'Evening', icon: Moon, color: '#0891B2', bg: '#F8FAFC' }
             ].map((block) => (
-              <div key={block.id} className="space-y-8">
-                <div className="flex items-center justify-between px-4">
-                  <div className="flex items-center gap-5">
-                    <div className="p-3 rounded-2xl shadow-sm transition-transform hover:scale-110 duration-500" style={{ backgroundColor: block.bg, color: block.color }}>
-                      <block.icon className="w-5 h-5" />
+              <div key={block.id} className="space-y-6">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl shadow-sm transition-transform hover:scale-110 duration-500" style={{ backgroundColor: block.bg, color: block.color }}>
+                      <block.icon className="w-4 h-4" />
                     </div>
-                    <h3 className="text-sm font-black uppercase tracking-[0.3em]" style={{ color: '#0F172A' }}>{block.id}</h3>
+                    <h3 className="text-xs font-black uppercase tracking-wider" style={{ color: '#0F172A' }}>{block.id}</h3>
                   </div>
-                  <div className="px-4 py-1.5 rounded-full text-[10px] font-black text-white shadow-md" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+                  <div className="px-3 py-1 rounded-full text-[9px] font-black text-white shadow-md" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
                     {tasks.filter(t => t.block === block.id && !t.completed).length}
                   </div>
                 </div>
@@ -619,8 +619,8 @@ const Planner = () => {
                       </div>
                     </div>
                   ) : (
-                    <button onClick={() => setIsAddingTask(block.id)} className="w-full flex items-center justify-center gap-4 p-8 border-2 border-dashed rounded-[40px] font-black text-[10px] uppercase tracking-[0.3em] transition-all duration-500 group" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5', color: '#06B6D4' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.borderColor = '#06B6D4'; e.currentTarget.style.color = '#0891B2' }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#D1FAE5'; e.currentTarget.style.color = '#06B6D4' }}>
-                      <PlusCircle className="w-6 h-6 group-hover:rotate-90 duration-500" />
+                    <button onClick={() => setIsAddingTask(block.id)} className="w-full flex items-center justify-center gap-3 p-6 border-2 border-dashed rounded-[20px] font-black text-[9px] uppercase tracking-wider transition-all duration-500 group" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5', color: '#06B6D4' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.borderColor = '#06B6D4'; e.currentTarget.style.color = '#0891B2' }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.borderColor = '#D1FAE5'; e.currentTarget.style.color = '#06B6D4' }}>
+                      <PlusCircle className="w-5 h-5 group-hover:rotate-90 duration-500" />
                       Add Mission
                     </button>
                   )}
@@ -630,20 +630,20 @@ const Planner = () => {
           </div>
 
           {/* Completed Section */}
-          <section className="pt-16 border-t" style={{ borderTop: '1px solid #D1FAE5' }}>
-            <div className="flex items-center justify-between mb-12">
-              <div className="flex items-center gap-5">
-                <div className="p-4 rounded-[24px] shadow-premium-sm" style={{ backgroundColor: '#F8FAFC', color: '#22C55E' }}>
-                  <CheckCircle className="w-8 h-8" />
+          <section className="pt-8 border-t" style={{ borderTop: '1px solid #D1FAE5' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl shadow-premium-sm" style={{ backgroundColor: '#F8FAFC', color: '#22C55E' }}>
+                  <CheckCircle className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black tracking-tight" style={{ color: '#0F172A' }}>Success Journey</h2>
-                  <p className="text-[11px] font-black uppercase tracking-[0.4em] mt-1" style={{ color: '#94A3B8' }}>Recently Accomplished</p>
+                  <h2 className="text-xl font-black tracking-tight" style={{ color: '#0F172A' }}>Success Journey</h2>
+                  <p className="text-[10px] font-black uppercase tracking-wider mt-0.5" style={{ color: '#94A3B8' }}>Recently Accomplished</p>
                 </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {tasks.filter(t => t.completed).map(task => (
                 <PlannerTaskCard key={task.id} task={task} onToggle={toggleTask} onDelete={handleDeleteTask} />
               ))}
@@ -653,25 +653,25 @@ const Planner = () => {
       </main>
 
       {/* Right Focus Panel */}
-      <aside className="w-[420px] h-full flex flex-col shrink-0 z-10" style={{ backgroundColor: '#F8FAFC', borderLeft: '1px solid #D1FAE5' }}>
-        <div className="flex-1 min-h-0 p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+      <aside className="w-[340px] h-full flex flex-col shrink-0 z-10" style={{ backgroundColor: '#F8FAFC', borderLeft: '1px solid #D1FAE5' }}>
+        <div className="flex-1 min-h-0 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
           <ProductivitySummaryCard stats={displayStats} />
 
           {/* Focus Timer */}
           <FocusTimerCard activeTask={activeTask} onSessionComplete={handleSaveFocus} />
 
           {/* Daily Wisdom Card */}
-          <div className="p-8 rounded-[32px] border relative overflow-hidden group shadow-sm transition-all hover:shadow-premium duration-500" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
+          <div className="p-6 rounded-[24px] border relative overflow-hidden group shadow-sm transition-all hover:shadow-premium duration-500 shrink-0" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
             <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-125 transition-transform duration-1000 rotate-12">
-              <div className="w-32 h-32 rounded-full blur-3xl" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }} />
+              <div className="w-24 h-24 rounded-full blur-2xl" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }} />
             </div>
-            <div className="flex items-center gap-3 mb-4 relative z-10">
-               <div className="p-2 rounded-xl shadow-lg text-white" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
-                  <Star className="w-4 h-4 fill-white" />
+            <div className="flex items-center gap-2 mb-3 relative z-10">
+               <div className="p-2 rounded-lg shadow-md text-white" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
+                  <Star className="w-3.5 h-3.5 fill-white" />
                </div>
-               <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: '#06B6D4' }}>Daily Wisdom</span>
+               <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: '#06B6D4' }}>Daily Wisdom</span>
             </div>
-            <p className="font-bold text-base relative z-10 leading-relaxed tracking-tight italic" style={{ color: '#0F172A' }}>
+            <p className="font-bold text-sm relative z-10 leading-relaxed tracking-tight italic" style={{ color: '#0F172A' }}>
               "Your attention is your greatest asset. Invest it wisely in things that grow you."
             </p>
           </div>
