@@ -147,6 +147,22 @@ export const getBoardData = async (req, res) => {
   const { boardId } = req.params;
   const { date } = req.query || {};
   
+  // Check if user is board admin or global fivopay admin
+  let isBoardAdmin = false;
+  if (req.user) {
+    if (req.user.email === 'fivopay@gmail.com') {
+      isBoardAdmin = true;
+    } else {
+      const roleResult = await query(
+        'SELECT role FROM board_members WHERE board_id = $1 AND user_id = $2',
+        [boardId, req.user.id]
+      );
+      if (roleResult.rows.length > 0 && roleResult.rows[0].role === 'admin') {
+        isBoardAdmin = true;
+      }
+    }
+  }
+
   // Handle case where this is called from analytics controller (without res)
   if (!res) {
     const listsResult = await query(
@@ -166,7 +182,7 @@ export const getBoardData = async (req, res) => {
       }
 
       // Role-based filtering: employees only see their assigned cards
-      if (req.user && req.user.email !== 'fivopay@gmail.com') {
+      if (req.user && !isBoardAdmin) {
         cardsQuery += ` AND c.assigned_to = $${params.length + 1}`;
         params.push(req.user.id);
       }
@@ -210,7 +226,7 @@ export const getBoardData = async (req, res) => {
       }
 
       // Role-based filtering: employees only see their assigned cards
-      if (req.user && req.user.email !== 'fivopay@gmail.com') {
+      if (req.user && !isBoardAdmin) {
         cardsQuery += ` AND c.assigned_to = $${params.length + 1}`;
         params.push(req.user.id);
       }

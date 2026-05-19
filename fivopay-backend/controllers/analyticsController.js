@@ -1,4 +1,5 @@
 import { getBoardData, getBoardMembers, getBoards } from './workspaceController.js';
+import { query } from '../config/db.js';
 
 // Get overall statistics for a board
 export const getBoardStats = async (req, res) => {
@@ -76,6 +77,8 @@ export const getEmployeePerformance = async (req, res) => {
 
     const boardData = await getBoardData(req);
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
+    const membersData = await getBoardMembers({ params: { boardId } });
+    const members = Array.isArray(membersData) ? membersData : (membersData?.data || membersData || []);
     
     const allTasks = lists.flatMap(list => 
       (list.cards || []).map(card => ({
@@ -110,6 +113,34 @@ export const getEmployeePerformance = async (req, res) => {
     // Calculate performance per employee
     const performance = {};
     
+    // Check if user is board admin or global fivopay admin
+    let isBoardAdmin = false;
+    if (req.user) {
+      if (req.user.email === 'fivopay@gmail.com') {
+        isBoardAdmin = true;
+      } else {
+        const roleResult = await query(
+          'SELECT role FROM board_members WHERE board_id = $1 AND user_id = $2',
+          [boardId, req.user.id]
+        );
+        if (roleResult.rows.length > 0 && roleResult.rows[0].role === 'admin') {
+          isBoardAdmin = true;
+        }
+      }
+    }
+
+    // Initialize performance for all board members if board admin or global admin
+    if (isBoardAdmin) {
+      members.forEach(member => {
+        performance[member.name] = {
+          name: member.name,
+          total: 0,
+          completed: 0,
+          overdue: 0
+        };
+      });
+    }
+
     filteredTasks.forEach(task => {
       const assignee = task.assignee_name || 'Unassigned';
       if (!performance[assignee]) {
@@ -280,7 +311,7 @@ export const getDashboardAnalytics = async (req, res) => {
         case 'today':
           return taskDate >= today;
         case 'weekly':
-          return taskDate >= monthAgo;
+          return taskDate >= weekAgo;
         case 'monthly':
           return taskDate >= monthAgo;
         default:
@@ -297,6 +328,34 @@ export const getDashboardAnalytics = async (req, res) => {
     // Employee performance
     const performance = {};
     
+    // Check if user is board admin or global fivopay admin
+    let isBoardAdmin = false;
+    if (req.user) {
+      if (req.user.email === 'fivopay@gmail.com') {
+        isBoardAdmin = true;
+      } else {
+        const roleResult = await query(
+          'SELECT role FROM board_members WHERE board_id = $1 AND user_id = $2',
+          [boardId, req.user.id]
+        );
+        if (roleResult.rows.length > 0 && roleResult.rows[0].role === 'admin') {
+          isBoardAdmin = true;
+        }
+      }
+    }
+
+    // Initialize performance for all board members if board admin or global admin
+    if (isBoardAdmin) {
+      members.forEach(member => {
+        performance[member.name] = {
+          name: member.name,
+          total: 0,
+          completed: 0,
+          overdue: 0
+        };
+      });
+    }
+
     filteredTasks.forEach(task => {
       const assignee = task.assignee_name || 'Unassigned';
       if (!performance[assignee]) {
