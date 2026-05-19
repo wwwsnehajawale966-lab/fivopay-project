@@ -25,9 +25,12 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed.' 
+        message: error.response?.data?.message || error.response?.data?.error || 'Login failed. Please check backend logs.' 
       };
     }
   };

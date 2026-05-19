@@ -9,7 +9,7 @@ export const getBoardStats = async (req, res) => {
     const { boardId } = req.params;
     const { dateFilter = 'all' } = req.query;
 
-    const boardData = await getBoardData({ params: { boardId } });
+    const boardData = await getBoardData(req);
     console.log('Board data received:', boardData);
     
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
@@ -74,7 +74,7 @@ export const getEmployeePerformance = async (req, res) => {
     const { boardId } = req.params;
     const { dateFilter = 'all' } = req.query;
 
-    const boardData = await getBoardData({ params: { boardId } });
+    const boardData = await getBoardData(req);
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
     
     const allTasks = lists.flatMap(list => 
@@ -149,7 +149,7 @@ export const getWeeklyProductivity = async (req, res) => {
   try {
     const { boardId } = req.params;
 
-    const boardData = await getBoardData({ params: { boardId } });
+    const boardData = await getBoardData(req);
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
     
     const allTasks = lists.flatMap(list => 
@@ -196,7 +196,7 @@ export const getTaskStatusDistribution = async (req, res) => {
     const { boardId } = req.params;
     const { dateFilter = 'all' } = req.query;
 
-    const boardData = await getBoardData({ params: { boardId } });
+    const boardData = await getBoardData(req);
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
     
     const allTasks = lists.flatMap(list => 
@@ -253,7 +253,7 @@ export const getDashboardAnalytics = async (req, res) => {
     const { boardId } = req.params;
     const { dateFilter = 'all' } = req.query;
 
-    const boardData = await getBoardData({ params: { boardId } });
+    const boardData = await getBoardData(req);
     const lists = Array.isArray(boardData) ? boardData : (boardData?.data?.lists || boardData || []);
     const membersData = await getBoardMembers({ params: { boardId } });
     const members = Array.isArray(membersData) ? membersData : (membersData?.data || membersData || []);

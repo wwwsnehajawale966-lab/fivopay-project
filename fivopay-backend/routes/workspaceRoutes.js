@@ -13,7 +13,8 @@ import {
   getUsers,
   inviteToBoard,
   getBoardMembers,
-  updateBoard
+  updateBoard,
+  deleteBoard
 } from '../controllers/workspaceController.js';
 import auth from '../middleware/auth.js';
 
@@ -25,6 +26,7 @@ router.get('/users', getUsers);
 router.get('/boards', getBoards);
 router.post('/boards', createBoard);
 router.put('/boards', updateBoard);
+router.delete('/boards/:boardId', deleteBoard);
 router.post('/invite', inviteToBoard);
 router.get('/board/:boardId', getBoardData);
 router.get('/board/:boardId/members', getBoardMembers);

@@ -3,7 +3,12 @@ import { query } from '../config/db.js';
 // युजर्सची लिस्ट मिळवण्यासाठी
 export const getUsers = async (req, res) => {
   try {
-    const result = await query('SELECT id, name, email FROM users');
+    let result;
+    if (req.user && req.user.email === 'fivopay@gmail.com') {
+      result = await query('SELECT id, name, email FROM users');
+    } else {
+      result = await query('SELECT id, name, email FROM users WHERE id = $1', [req.user.id]);
+    }
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users' });
@@ -14,14 +19,20 @@ export const getUsers = async (req, res) => {
 
 export const getBoards = async (req, res) => {
   try {
-    // आता आपण त्या बोर्ड्सना मिळवू जिथे हा युजर मेंबर आहे
-    const result = await query(
-      `SELECT b.* FROM boards b 
-       INNER JOIN board_members bm ON b.id = bm.board_id 
-       WHERE bm.user_id = $1 
-       ORDER BY b.created_at DESC`,
-      [req.user.id]
-    );
+    let result;
+    if (req.user && req.user.email === 'fivopay@gmail.com') {
+      // Admin sees all boards
+      result = await query('SELECT * FROM boards ORDER BY created_at DESC');
+    } else {
+      // Employees see only boards they are members of
+      result = await query(
+        `SELECT b.* FROM boards b 
+         INNER JOIN board_members bm ON b.id = bm.board_id 
+         WHERE bm.user_id = $1 
+         ORDER BY b.created_at DESC`,
+        [req.user.id]
+      );
+    }
     res.json(result.rows);
   } catch (error) {
     console.error(error);
@@ -63,6 +74,26 @@ export const updateBoard = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error updating board' });
+  }
+};
+
+export const deleteBoard = async (req, res) => {
+  const { boardId } = req.params;
+  try {
+    // Delete associated board_members, lists, and cards first to avoid foreign key constraints (if no cascade)
+    await query('DELETE FROM board_members WHERE board_id = $1', [boardId]);
+    const lists = await query('SELECT id FROM lists WHERE board_id = $1', [boardId]);
+    for (const list of lists.rows) {
+        await query('DELETE FROM cards WHERE list_id = $1', [list.id]);
+    }
+    await query('DELETE FROM lists WHERE board_id = $1', [boardId]);
+    
+    // Finally delete the board
+    await query('DELETE FROM boards WHERE id = $1', [boardId]);
+    res.json({ message: 'Board deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting board' });
   }
 };
 
@@ -130,8 +161,14 @@ export const getBoardData = async (req, res) => {
       let params = [list.id];
 
       if (date && date !== '' && date !== 'null' && date !== 'undefined') {
-        cardsQuery += ' AND c.due_date::date = $2::date';
+        cardsQuery += ` AND c.due_date::date = $${params.length + 1}::date`;
         params.push(date);
+      }
+
+      // Role-based filtering: employees only see their assigned cards
+      if (req.user && req.user.email !== 'fivopay@gmail.com') {
+        cardsQuery += ` AND c.assigned_to = $${params.length + 1}`;
+        params.push(req.user.id);
       }
 
       cardsQuery += ' ORDER BY c.position ASC';
@@ -168,8 +205,14 @@ export const getBoardData = async (req, res) => {
       let params = [list.id];
 
       if (date && date !== '' && date !== 'null' && date !== 'undefined') {
-        cardsQuery += ' AND c.due_date::date = $2::date';
+        cardsQuery += ` AND c.due_date::date = $${params.length + 1}::date`;
         params.push(date);
+      }
+
+      // Role-based filtering: employees only see their assigned cards
+      if (req.user && req.user.email !== 'fivopay@gmail.com') {
+        cardsQuery += ` AND c.assigned_to = $${params.length + 1}`;
+        params.push(req.user.id);
       }
 
       cardsQuery += ' ORDER BY c.position ASC';
@@ -247,7 +290,7 @@ export const createCard = async (req, res) => {
         title,
         position,
         due_date || null,
-        assigned_to || null,
+        (assigned_to || (req.user && req.user.email !== 'fivopay@gmail.com' ? req.user.id : null)),
         description || '',
         is_done || false,
         JSON.stringify(labels || []),

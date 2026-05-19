@@ -113,9 +113,12 @@ const PlannerTaskCard = ({ task, onToggle, onDelete }) => {
 };
 
 const FocusTimerCard = ({ activeTask, onSessionComplete }) => {
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const TOTAL = 25 * 60;
+  const [timeLeft, setTimeLeft] = useState(TOTAL);
   const [isActive, setIsActive] = useState(false);
-  const [startTime, setStartTime] = useState(null);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
+  const startTimeRef = React.useRef(null);
 
   useEffect(() => {
     let interval = null;
@@ -123,25 +126,32 @@ const FocusTimerCard = ({ activeTask, onSessionComplete }) => {
       interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
-      handleComplete();
-      clearInterval(interval);
+    } else if (isActive && timeLeft === 0) {
+      setIsActive(false);
+      saveSession();
     }
     return () => clearInterval(interval);
   }, [isActive, timeLeft]);
 
-  const handleComplete = async () => {
+  const saveSession = async () => {
     setIsActive(false);
     const endTime = new Date();
-    const duration = Math.round((25 * 60 - timeLeft) / 60);
-    if (duration > 0) {
+    const elapsedSeconds = TOTAL - timeLeft;
+    const duration = Math.max(1, Math.round(elapsedSeconds / 60));
+    try {
       await onSessionComplete({
-        start_time: startTime,
+        start_time: startTimeRef.current || new Date(Date.now() - elapsedSeconds * 1000),
         end_time: endTime,
         duration_minutes: duration
       });
+      setSessionSaved(true);
+      setTimeout(() => setSessionSaved(false), 4000);
+    } catch (err) {
+      console.error('Failed to save session:', err);
     }
-    setTimeLeft(25 * 60);
+    setTimeLeft(TOTAL);
+    setHasStarted(false);
+    startTimeRef.current = null;
   };
 
   const formatTime = (seconds) => {
@@ -151,81 +161,111 @@ const FocusTimerCard = ({ activeTask, onSessionComplete }) => {
   };
 
   const toggleTimer = () => {
-    if (!isActive) setStartTime(new Date());
+    if (!isActive && !hasStarted) {
+      startTimeRef.current = new Date();
+      setHasStarted(true);
+    }
     setIsActive(!isActive);
   };
 
   const resetTimer = () => {
     setIsActive(false);
-    setTimeLeft(25 * 60);
+    setHasStarted(false);
+    setTimeLeft(TOTAL);
+    startTimeRef.current = null;
   };
 
+  const progress = ((TOTAL - timeLeft) / TOTAL); // 0 to 1
+  const circumference = 2 * Math.PI * 88; // ~553
+
   return (
-    <div className="p-6 rounded-[24px] shadow-premium border text-center relative overflow-hidden group" style={{ backgroundColor: '#FFFFFF', borderColor: '#D1FAE5' }}>
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6 rounded-[24px] border text-center relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', borderColor: '#D1FAE5', boxShadow: '0 2px 16px rgba(6,182,212,0.08)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
         <h4 className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: '#06B6D4' }}>Deep Work</h4>
-        <div className={`p-2 rounded-full ${isActive ? 'animate-pulse shadow-lg' : ''}`} style={{ backgroundColor: isActive ? '#06B6D4' : '#F8FAFC', color: isActive ? '#FFFFFF' : '#94A3B8' }}>
+        <div className={`p-2 rounded-full transition-all ${isActive ? 'animate-pulse' : ''}`}
+          style={{ backgroundColor: isActive ? '#06B6D4' : '#F8FAFC', color: isActive ? '#FFFFFF' : '#94A3B8' }}>
           <Brain className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="relative inline-block mb-6">
-        <svg className="w-48 h-48 -rotate-90">
+      {/* Controls */}
+      <div className="flex gap-3 mb-5">
+        {/* Play / Pause */}
+        <button
+          onClick={toggleTimer}
+          className="flex-1 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all hover:scale-105"
+          style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)', color: '#FFFFFF', boxShadow: '0 4px 14px rgba(6,182,212,0.35)' }}
+        >
+          {isActive ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white" />}
+          {isActive ? 'Pause' : hasStarted ? 'Resume' : 'Start'}
+        </button>
+        {/* Reset */}
+        <button
+          onClick={resetTimer}
+          title="Reset Timer"
+          className="p-3 rounded-2xl border transition-all hover:bg-gray-100"
+          style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5', color: '#94A3B8' }}
+        >
+          <RotateCcw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Stop & Save — shown only after timer started */}
+      {hasStarted && (
+        <button
+          onClick={saveSession}
+          className="w-full mb-5 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] border flex items-center justify-center gap-2 transition-all hover:shadow-md"
+          style={{ backgroundColor: '#F0FDF4', borderColor: '#86EFAC', color: '#16A34A' }}
+        >
+          <CheckCircle className="w-4 h-4" />
+          Stop &amp; Save Session
+        </button>
+      )}
+
+      {/* Circular Timer */}
+      <div className="relative inline-block mb-5">
+        <svg className="w-44 h-44 -rotate-90" viewBox="0 0 192 192">
+          {/* Background track */}
+          <circle cx="96" cy="96" r="88" fill="none" strokeWidth="8" stroke="#F1F5F9" />
+          {/* Progress arc */}
           <circle
-            cx="96"
-            cy="96"
-            r="88"
-            fill="none"
-            strokeWidth="8"
-            style={{ stroke: '#F8FAFC' }}
-          />
-          <circle
-            cx="96"
-            cy="96"
-            r="88"
-            fill="none"
-            strokeWidth="8"
-            strokeDasharray={553}
-            strokeDashoffset={553 * (1 - timeLeft / (25 * 60))}
+            cx="96" cy="96" r="88" fill="none" strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
-            className="transition-all duration-1000 ease-linear shadow-lg"
-            style={{ stroke: '#06B6D4' }}
+            style={{ stroke: isActive ? '#06B6D4' : (hasStarted ? '#0891B2' : '#CBD5E1'), transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
           />
         </svg>
-
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-5xl font-black tracking-tighter mb-1" style={{ color: '#0F172A' }}>{formatTime(timeLeft)}</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: '#94A3B8' }}>Minute</span>
+          <span className="text-4xl font-black tracking-tighter" style={{ color: '#0F172A' }}>{formatTime(timeLeft)}</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] mt-1" style={{ color: '#94A3B8' }}>
+            {isActive ? 'FOCUSING...' : hasStarted ? 'PAUSED' : 'READY'}
+          </span>
         </div>
       </div>
 
-      <div className="mb-6 p-4 rounded-[20px] border" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2" style={{ color: '#06B6D4' }}>Focus Target</p>
-        <h5 className="text-sm font-black truncate px-2" style={{ color: '#0F172A' }}>
-          {activeTask?.title || 'Relax and breathe'}
+      {/* Focus Target */}
+      <div className="mb-4 px-4 py-3 rounded-2xl border" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: '#06B6D4' }}>Focus Target</p>
+        <h5 className="text-sm font-black truncate" style={{ color: '#0F172A' }}>
+          {activeTask?.title || '🧘 Relax and breathe'}
         </h5>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button 
-          onClick={toggleTimer}
-          className="flex-1 py-4 rounded-[20px] font-black text-xs uppercase tracking-[0.3em] shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)', color: '#FFFFFF' }}
-        >
-          {isActive ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white" />}
-          {isActive ? 'Pause' : 'Focus'}
-        </button>
-        <button 
-          onClick={resetTimer}
-          className="p-4 rounded-[20px] transition-all border"
-          style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5', color: '#94A3B8' }}
-        >
-          <RotateCcw className="w-5 h-5" />
-        </button>
-      </div>
+      {/* Success Banner */}
+      {sessionSaved && (
+        <div className="mb-3 py-2 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2"
+          style={{ backgroundColor: '#DCFCE7', color: '#16A34A' }}>
+          <CheckCircle className="w-4 h-4" />
+          Session saved! Great work 🎉
+        </div>
+      )}
+
     </div>
   );
 };
+
 
 const ProductivitySummaryCard = ({ stats }) => (
   <div className="rounded-[32px] p-6 text-white shadow-premium relative overflow-hidden group" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }}>
@@ -614,10 +654,13 @@ const Planner = () => {
 
       {/* Right Focus Panel */}
       <aside className="w-[420px] h-full flex flex-col shrink-0 z-10" style={{ backgroundColor: '#F8FAFC', borderLeft: '1px solid #D1FAE5' }}>
-        <div className="p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 min-h-0 p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
           <ProductivitySummaryCard stats={displayStats} />
 
-          {/* Apple-style Activity Card */}
+          {/* Focus Timer */}
+          <FocusTimerCard activeTask={activeTask} onSessionComplete={handleSaveFocus} />
+
+          {/* Daily Wisdom Card */}
           <div className="p-8 rounded-[32px] border relative overflow-hidden group shadow-sm transition-all hover:shadow-premium duration-500" style={{ backgroundColor: '#F8FAFC', borderColor: '#D1FAE5' }}>
             <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-125 transition-transform duration-1000 rotate-12">
               <div className="w-32 h-32 rounded-full blur-3xl" style={{ background: 'linear-gradient(135deg, #06B6D4, #0891B2)' }} />

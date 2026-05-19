@@ -1,0 +1,11 @@
+.env
+fivopay-backend/.env
+fivopay-workspace/.env
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.log
+backup.sql
+fivopay-backend/scratch_*.js
+fivopay-backend/test_*.js
+fivopay-backend/send_login_request.js

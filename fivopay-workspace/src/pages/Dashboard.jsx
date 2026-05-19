@@ -169,7 +169,7 @@ const CalendarDropdown = ({ selectedDate, onDateSelect }) => {
   );
 };
 
-const Sidebar = ({ boards, activeBoardId, onBoardSelect, onCreateBoard, onLogout, user, navigate, sidebarOpen, onClose }) => (
+const Sidebar = ({ boards, activeBoardId, onBoardSelect, onCreateBoard, onDeleteBoard, onLogout, user, navigate, sidebarOpen, onClose }) => (
   <>
     {/* Sidebar */}
     <aside
@@ -217,19 +217,29 @@ const Sidebar = ({ boards, activeBoardId, onBoardSelect, onCreateBoard, onLogout
         </div>
         <div className="space-y-1 px-2">
           {boards.map(board => (
-            <button
-              key={board.id}
-              onClick={() => onBoardSelect(board.id)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 transition-all duration-200 rounded-lg font-medium text-sm ${
-                activeBoardId === board.id
-                  ? 'shadow-lg'
-                  : ''
-              }`}
-              style={activeBoardId === board.id ? { backgroundColor: '#06B6D4', color: '#FFFFFF' } : { color: '#475569' }}
-            >
-              <div className={`w-2 h-2 rounded-full ${activeBoardId === board.id ? 'bg-white' : 'bg-gray-600'}`} />
-              <span className="truncate">{board.title}</span>
-            </button>
+            <div key={board.id} className="relative group flex items-center">
+              <button
+                onClick={() => onBoardSelect(board.id)}
+                className={`flex-1 flex items-center gap-3 px-4 py-2.5 transition-all duration-200 rounded-lg font-medium text-sm ${
+                  activeBoardId === board.id
+                    ? 'shadow-lg'
+                    : ''
+                }`}
+                style={activeBoardId === board.id ? { backgroundColor: '#06B6D4', color: '#FFFFFF' } : { color: '#475569' }}
+              >
+                <div className={`w-2 h-2 rounded-full ${activeBoardId === board.id ? 'bg-white' : 'bg-gray-600'}`} />
+                <span className="truncate">{board.title}</span>
+              </button>
+              {onDeleteBoard && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDeleteBoard(board.id); }}
+                  className="absolute right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 text-red-500"
+                  title="Delete Project"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </nav>
@@ -515,6 +525,21 @@ const Dashboard = () => {
       setIsInviting(false);
     } catch (err) {
       alert('Failed to invite user');
+    }
+  };
+
+  const handleDeleteBoard = async (boardId) => {
+    if (!window.confirm('Are you sure you want to delete this project? This will delete all its lists and cards.')) return;
+    try {
+      await workspaceService.deleteBoard(boardId);
+      const newBoards = boards.filter(b => b.id !== boardId);
+      setBoards(newBoards);
+      if (activeBoardId === boardId) {
+        setActiveBoardId(newBoards.length > 0 ? newBoards[0].id : null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete board');
     }
   };
 
@@ -857,6 +882,7 @@ const Dashboard = () => {
         activeBoardId={activeBoardId}
         onBoardSelect={setActiveBoardId}
         onCreateBoard={handleCreateBoard}
+        onDeleteBoard={handleDeleteBoard}
         onLogout={() => { logout(); navigate('/login'); }}
         user={user}
         navigate={navigate}
@@ -1175,13 +1201,17 @@ const Dashboard = () => {
                                         <Clock className="w-3 h-3" />
                                         <span>{new Date(card.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                       </div>
-
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm hover:shadow-md transition-shadow"
-                                          style={{ backgroundColor: '#06B6D4', color: '#FFFFFF' }}>
-                                          {card.assignee_name?.[0] || '?'}
+                                      
+                                      {card.assignee_name && (
+                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 shadow-sm">
+                                          <div className="w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center text-[8px] text-white font-bold">
+                                            {card.assignee_name[0]}
+                                          </div>
+                                          <span className="text-[10px] font-bold text-indigo-700 truncate max-w-[60px]">
+                                            {card.assignee_name}
+                                          </span>
                                         </div>
-                                      </div>
+                                      )}
                                     </div>
                                   </div>
                                 )}
@@ -1255,22 +1285,7 @@ const Dashboard = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-10 py-10 border-y border-indigo-50">
-                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 block mb-5">Assignee</label>
-                    <div className="relative group">
-                      <select
-                        value={editingCard.assigned_to || ''}
-                        onChange={(e) => setEditingCard({ ...editingCard, assigned_to: e.target.value })}
-                        className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[28px] font-black text-sm text-slate-900 shadow-sm outline-none focus:ring-8 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer"
-                      >
-                        <option value="">Choose Employee</option>
-                        {boardMembers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-200 pointer-events-none group-hover:text-indigo-500 transition-colors" />
-                    </div>
-                  </div>
-
+                <div className="grid grid-cols-2 gap-10 py-10 border-y border-indigo-50">
                   <div>
                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 block mb-5">Deadline</label>
                     <input

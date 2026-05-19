@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://fivopay-backend-2rhl.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,14 +43,15 @@ export const workspaceService = {
   getBoards: () => api.get('/workspace/boards'),
   createBoard: (title) => api.post('/workspace/boards', { title }),
   updateBoard: (boardId, title) => api.put('/workspace/boards', { boardId, title }),
+  deleteBoard: (boardId) => api.delete(`/workspace/boards/${boardId}`),
   inviteUser: (data) => api.post('/workspace/invite', data),
   getBoardData: (boardId, date) => api.get(`/workspace/board/${boardId}${date ? `?date=${date}` : ''}`),
   getBoardMembers: (boardId) => api.get(`/workspace/board/${boardId}/members`),
-  
+
   createList: (data) => api.post('/workspace/list', data),
   updateList: (data) => api.put('/workspace/list', data),
   deleteList: (listId) => api.delete(`/workspace/list/${listId}`),
-  
+
   createCard: (data) => api.post('/workspace/card', data),
   updateCard: (data) => api.put('/workspace/card', data),
   deleteCard: (cardId) => api.delete(`/workspace/card/${cardId}`),
@@ -67,15 +68,15 @@ export const plannerService = {
 };
 
 export const analyticsService = {
-  getDashboardAnalytics: (boardId, dateFilter = 'all') => 
+  getDashboardAnalytics: (boardId, dateFilter = 'all') =>
     api.get(`/analytics/dashboard/${boardId}${dateFilter !== 'all' ? `?dateFilter=${dateFilter}` : ''}`),
-  getBoardStats: (boardId, dateFilter = 'all') => 
+  getBoardStats: (boardId, dateFilter = 'all') =>
     api.get(`/analytics/stats/${boardId}${dateFilter !== 'all' ? `?dateFilter=${dateFilter}` : ''}`),
-  getEmployeePerformance: (boardId, dateFilter = 'all') => 
+  getEmployeePerformance: (boardId, dateFilter = 'all') =>
     api.get(`/analytics/performance/${boardId}${dateFilter !== 'all' ? `?dateFilter=${dateFilter}` : ''}`),
-  getWeeklyProductivity: (boardId) => 
+  getWeeklyProductivity: (boardId) =>
     api.get(`/analytics/weekly/${boardId}`),
-  getTaskStatusDistribution: (boardId, dateFilter = 'all') => 
+  getTaskStatusDistribution: (boardId, dateFilter = 'all') =>
     api.get(`/analytics/distribution/${boardId}${dateFilter !== 'all' ? `?dateFilter=${dateFilter}` : ''}`),
 };
 
